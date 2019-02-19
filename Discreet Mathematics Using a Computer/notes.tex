@@ -1,0 +1,305 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{marginnote}
+\usepackage[top=3cm, bottom=4cm, outer=3.5cm, inner=3.5cm, heightrounded, marginparwidth=2cm, marginparsep=1cm]{geometry}
+
+\usepackage{amsmath}
+\usepackage{amsthm}
+
+\theoremstyle{definition}
+\newtheorem{thm}{Theorem}
+\newtheorem{exr}{Exercise}
+
+\setlength{\parindent}{0pt}
+
+\usepackage{listings}
+\lstset{language=Haskell}
+\lstset{basicstyle=\footnotesize\ttfamily,breaklines=true}
+
+\begin{document}
+\section*{Chapter 2. Equational Reasoning}
+
+
+% -----------------------------------------------------------------------------
+\vspace{5mm}\rule{\textwidth}{0.1pt}\vspace{5mm}
+\marginnote{\scriptsize{p.38}}[4.5mm]
+
+\emph{equations in Haskell are true mathematical equations}---they are not 
+assignment statements.
+
+
+% -----------------------------------------------------------------------------
+\vspace{5mm}\rule{\textwidth}{0.1pt}
+\marginnote{\scriptsize{pp.38-39}}[7.5mm]
+
+\begin{thm}[length (++)]
+  Let \texttt{xs, ys :: [a]} be arbitrary lists.
+  Then \texttt{length (xs ++ ys) = length xs + length ys}.
+\end{thm}
+
+\begin{thm}[length map]
+  Let \texttt{xs :: [a]} be arbitrary list and \texttt{f :: a -> b} an 
+  arbitraty function. Then \texttt{length (map f xs) = length xs}.
+\end{thm}
+
+\begin{thm}[map (++)]
+  Let \texttt{xs, ys :: [a]} be arbitrary lists and \texttt{f :: a -> b} an 
+  arbitrary function. Then \texttt{map f (xs ++ ys) = map f xs ++ map f ys}.
+\end{thm}
+
+\begin{thm}
+  For arbitrary lists \texttt{xs, ys :: [a]}, 
+  and arbitrary \texttt{f :: a -> b},  the following equation holds: 
+  \texttt{length (map f (xs ++ ys)) = length xs + length ys}.
+\end{thm}
+
+\begin{proof}
+  We prove the theorem by equational reasoning, starting with the left hand side
+  of the equation and transforming it into the right hand side.
+  
+  \begin{align*}
+    \texttt{le}&\texttt{ngth (map f (xs ++ ys))}                           \\
+      &\texttt{= length (map f xs ++ map f ys)}  & \texttt{\{ map (++) \}} \\
+      &\texttt{= length (map f xs) + length (map f ys)}  & \texttt{\{ length (++) \}} \\
+      &\texttt{= length xs + length ys}  & \texttt{\{ length map \}}
+  \end{align*}
+\end{proof}
+
+
+% -----------------------------------------------------------------------------
+\rule{\textwidth}{0.1pt}\vspace{5mm}
+\marginnote{\scriptsize{p.44}}[4mm]
+
+Assignments have to be understood in the context of time passing as a program executes.
+To underrstand \texttt{n := n + 1} assignment, you need to talk about the old value
+of the variable, and its new value. In contrast, equations are timeless, as there is
+no notion of of changing the value of a variable. 
+
+% -----------------------------------------------------------------------------
+
+\newpage
+\section*{Chapter 3. Recursion}
+
+
+% -----------------------------------------------------------------------------
+\vspace{5mm}\rule{\textwidth}{0.1pt}\vspace{5mm}
+\marginnote{\scriptsize{p.48}}[4.5mm]
+
+
+\begin{lstlisting} 
+  factorial :: Int -> Int
+  factorial 0       = 1
+  factorial (n + 1) = (n + 1) * factorial n
+\end{lstlisting}
+
+\vspace{5mm}
+
+Recursive definitions consist of a collection of equations that state properties od 
+the function being degfined. There are a number of algebraic properties of the 
+factorial function, and one of them is used as the second equation of the recursive 
+definition. In fact, the definition doesn't consist of a set of commands to be 
+obeyed; it consists of a set of true equations describing the salient properties 
+of the function being defined. 
+
+
+% -----------------------------------------------------------------------------
+\vspace{5mm}\rule{\textwidth}{0.1pt}
+\marginnote{\scriptsize{pp.52-53}}[10mm]
+
+\subsection*{Exercises}
+
+% -----------------------------------------------------------------------------
+\vspace{5mm}
+
+\begin{exr}
+  Write a recursive function \texttt{copy :: [a] -> [a]} that copies its list 
+  argument. For example, \texttt{copy [2] $\Rightarrow$ [2]}.
+\end{exr}
+
+\textbf{Solution a}
+\begin{lstlisting}
+  copy :: [a] -> [a]
+  copy []     = []
+  copy (x:xs) = x : copy xs
+\end{lstlisting}
+
+\textbf{Solution b}
+\begin{lstlisting}
+  copy :: [a] -> [a]
+  copy = map id
+\end{lstlisting}
+
+% -----------------------------------------------------------------------------
+\vspace{5mm}
+
+\begin{exr}
+  Write a function \texttt{inverse} that takes a list of pairs and swaps the 
+  pair elements. For example,
+  \begin{lstlisting}
+    inverse [(1,2), (3,4)] ==> [(2,1), (4,3)]
+  \end{lstlisting}
+\end{exr}
+
+\textbf{Solution a}
+\begin{lstlisting}
+  inverse :: [a] -> [a]
+  inverse []         = []
+  inverse ((a,b):xs) = (b,a) : inverse xs
+\end{lstlisting}
+
+\textbf{Solution b}
+\begin{lstlisting}
+  inverse :: [a] -> [a]
+  inverse = map (\(a, b) -> (b, a))
+\end{lstlisting}
+
+\newpage
+\textbf{Solution c}
+\begin{lstlisting}
+  import Data.Tuple
+  inverse :: [a] -> [a]
+  inverse = map swap
+\end{lstlisting}
+
+
+% -----------------------------------------------------------------------------
+\vspace{5mm}
+
+\begin{exr}
+  Write a function
+
+  \begin{lstlisting}
+    merge :: Ord a => [a] -> [a] -> [a]
+  \end{lstlisting}
+
+  which takes two sorted lists and returns a sorted list containing the 
+  elements of each.
+\end{exr}
+
+\textbf{Solution}
+\begin{lstlisting}
+  merge :: Ord a :: [a] -> [a] -> [a]
+  merge [] ys = ys
+  merge (x:xs) ys = 
+    let 
+      smaller = [ y | y <- ys, y <= x ]
+      bigger  = [ y | y <- ys, y > x ]
+    in
+      merge xs (smaller ++ [x] ++ bigger)
+\end{lstlisting}
+
+
+
+% -----------------------------------------------------------------------------
+\vspace{5mm}
+
+\begin{exr}
+  Write \texttt{(!!)}, a function that takes a natural number \texttt{n} 
+  and a list and selects the \emph{n}th element of the list. List elements
+  are indexed from 0, not 1, and since the type of the incoming number 
+  does not prevent it from being out of range, the result should be 
+  a \texttt{Maybe} type. For example,
+
+  \begin{lstlisting}
+    [1,2,3]!!0 ==> Just 1
+    [1,2,3]!!2 ==> Just 3
+    [1,2,3]!!5 ==> Nothing
+  \end{lstlisting}
+\end{exr}
+
+\textbf{Solution}
+\begin{lstlisting}
+  (!!) :: [a] -> Int -> Maybe a
+  (!!) [] _     = Nothing
+  (!!) (x:xs) 0 = Just x
+  (!!) (x:xs) n = (!!) xs (n-1)
+\end{lstlisting}
+
+
+% -----------------------------------------------------------------------------
+\vspace{5mm}
+
+\begin{exr}
+  Write a function \texttt{lookup} that takes a value and a list of pairs, 
+  and returns the second element of the pair that has the value as its 
+  first element. Use a Maybe type to indicate whether the lookup succeeded. 
+  For example,
+
+  \begin{lstlisting}
+    lookup 5 [(1,2),(5,3)] ==> Just 3
+    lookup 6 [(1,2),(5,3)] ==> Nothing
+  \end{lstlisting}
+\end{exr}
+
+\textbf{Solution}
+\begin{lstlisting}
+  lookup :: Int -> [(Int, a)] -> Maybe a
+  lookup _ [] = Nothing
+  lookup n ((k,v):xs)
+    | n == k    = Just v
+    | otherwise = lookup n xs
+\end{lstlisting}
+
+
+
+% -----------------------------------------------------------------------------
+\newpage
+
+\begin{exr}
+  Write a function that counts the number of times an element appears in a list.
+\end{exr}
+
+\textbf{Solution}
+\begin{lstlisting}
+  count :: Eq a => [a] -> a -> Int
+  count []     n  = 0
+  count (x:xs) n
+    | x == n    = 1 + count xs n
+    | otherwise = count xs n
+\end{lstlisting}
+
+
+% -----------------------------------------------------------------------------
+\vspace{5mm}
+
+\begin{exr}
+  Write a function that takes a value \texttt{e} and a list of values \texttt{xs}
+  and removes all occurrences of \texttt{e} from \texttt{xs}.
+\end{exr}
+
+\textbf{Solution}
+\begin{lstlisting}
+  remove :: Eq a => [a] -> a -> [a]
+  remove []     _ = []
+  remove (x:xs) e
+    | e == x      = remove xs e
+    | otherwise   = x : remove xs e
+\end{lstlisting}
+
+
+% -----------------------------------------------------------------------------
+\vspace{5mm}
+
+\begin{exr}
+  Write a function 
+  
+  \begin{lstlisting}
+    f :: [a] -> [a]
+  \end{lstlisting}
+
+  that removes alternating elements of its list argument, starting with 
+  the first one. For examples, \texttt{f [1,2,3,4,5,6,7]} returns 
+  \texttt{[2,4,6]}.
+\end{exr}
+
+\textbf{Solution}
+\begin{lstlisting}
+  everyEven :: Eq a => [a] -> [a]
+  remove []     = []
+  remove (x:xs) = undefined
+\end{lstlisting}
+
+
+
+
+\end{document}
