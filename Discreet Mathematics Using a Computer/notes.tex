@@ -300,4 +300,91 @@ of the function being defined.
   alternating (x:xx:xs) = xx : alternating xs
 \end{lstlisting}
 
+
+% -----------------------------------------------------------------------------
+\vspace{5mm}
+
+\begin{exr}
+  Write a function \texttt{extract :: [Maybe a] -> [a]} that takes a list of 
+  \texttt{Maybe} values and returns the elements they contain. For example, 
+  \texttt{extract [Just 3, Nothing, Just 7] = [3, 7]}.
+\end{exr}
+
+\textbf{Solution}
+\begin{lstlisting}
+  extract :: [Maybe a] -> [a]
+  extract []             = []
+  extract ((Nothing):xs) = extract xs
+  extract ((Just x):xs)  = x : extract xs
+\end{lstlisting}
+
+
+% -----------------------------------------------------------------------------
+\newpage
+
+\begin{exr}
+  Write a function
+
+  \begin{lstlisting}
+    f :: String -> String -> Maybe Int
+  \end{lstlisting}
+
+  that takes two strings. If the second string appears within the first, 
+  it returns the index identifying where it starts. Indexes start from 0. 
+  For example,
+
+  \begin{lstlisting}
+    f "abcde" "bc" ==> Just 1
+    f "abcde" "fg" ==> Nothing
+  \end{lstlisting}
+\end{exr}
+
+\textbf{Solution}
+\begin{lstlisting}
+  f :: String -> String -> Maybe Int
+  f text query = search text query 0
+    where tokenOf       = take (length query)
+          search [] _ _ = Nothing
+          search t q i  = if tokenOf t == q
+                          then Just i
+                          else search (tail t) q (i+1)
+\end{lstlisting}
+
+
+% -----------------------------------------------------------------------------
+\vspace{5mm}
+\marginnote{\scriptsize{p.56}}[8mm]
+
+\begin{exr}
+  Write \texttt{foldrWith}, a function that behaves like \texttt{foldr} except 
+  that it takes a function of three arguments and two lists.
+\end{exr}
+
+\textbf{Solution}
+\begin{lstlisting}
+  foldrWith :: (a -> b -> c -> a) -> a -> [b] -> [c] -> a
+  foldrWith _ acc [] _ = acc
+  foldrWith _ acc _ [] = acc
+  foldrWith f acc (x:xs) (y:ys) = foldrWith f (f acc x y) xs ys
+\end{lstlisting}
+
+
+
+% -----------------------------------------------------------------------------
+\vspace{5mm}
+
+\begin{exr}
+  Using \texttt{foldr}, write a function \texttt{mappend} such that
+
+  \begin{lstlisting}
+    mappend f xs = concat (map f xs)
+  \end{lstlisting}
+\end{exr}
+
+\textbf{Solution}
+\begin{lstlisting}
+  mappend :: [a] -> [a]
+  mappend f xs = foldr ff [] xs
+    where ff e acc = f e ++ acc
+\end{lstlisting}
 \end{document}
