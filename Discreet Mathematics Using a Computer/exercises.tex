@@ -1,0 +1,500 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{marginnote}
+\usepackage[top=3cm, bottom=4cm, outer=3.5cm, inner=3.5cm, heightrounded, marginparwidth=2cm, marginparsep=1cm]{geometry}
+
+\usepackage{amsmath}
+\usepackage{amsthm}
+
+\theoremstyle{definition}
+\newtheorem{thm}{Theorem}
+\newtheorem{exr}{Exercise}
+
+\setlength{\parindent}{0pt}
+
+\usepackage{listings}
+\lstset{language=Haskell}
+\lstset{basicstyle=\footnotesize\ttfamily,breaklines=true}
+
+\begin{document}
+
+\section*{Exercises}
+
+
+\subsection*{Chapter 3}
+% -------------------------------------------------------------------
+
+\marginnote{\scriptsize{pp.52-53}}[7.5mm]
+
+
+% -- Ex.01 ----------------------------------------------------------
+
+\begin{exr}
+  Write a recursive function \texttt{copy :: [a] -> [a]} that copies 
+  its list argument. For example, \texttt{copy [2] $\Rightarrow$ [2]}.
+\end{exr}
+
+\textbf{Solution a}
+\begin{lstlisting}
+  copy :: [a] -> [a]
+  copy []     = []
+  copy (x:xs) = x : copy xs
+\end{lstlisting}
+
+\textbf{Solution b}
+\begin{lstlisting}
+  copy :: [a] -> [a]
+  copy = map id
+\end{lstlisting}
+
+
+% -- Ex.02 ----------------------------------------------------------
+\vspace{5mm}
+
+\begin{exr}
+  Write a function \texttt{inverse} that takes a list of pairs and 
+  swaps the pair elements. For example,
+  \begin{lstlisting}
+    inverse [(1,2), (3,4)] ==> [(2,1), (4,3)]
+  \end{lstlisting}
+\end{exr}
+
+\textbf{Solution a}
+\begin{lstlisting}
+  inverse :: [a] -> [a]
+  inverse []         = []
+  inverse ((a,b):xs) = (b,a) : inverse xs
+\end{lstlisting}
+
+\textbf{Solution b}
+\begin{lstlisting}
+  inverse :: [a] -> [a]
+  inverse = map (\(a, b) -> (b, a))
+\end{lstlisting}
+
+\textbf{Solution c}
+\begin{lstlisting}
+  import Data.Tuple
+  inverse :: [a] -> [a]
+  inverse = map swap
+\end{lstlisting}
+
+
+% -- Ex.03 ----------------------------------------------------------
+\vspace{5mm}
+
+\begin{exr}
+  Write a function
+
+  \begin{lstlisting}
+    merge :: Ord a => [a] -> [a] -> [a]
+  \end{lstlisting}
+
+  which takes two sorted lists and returns a sorted list containing the 
+  elements of each.
+\end{exr}
+
+\textbf{Solution}
+\begin{lstlisting}
+  merge :: Ord a :: [a] -> [a] -> [a]
+  merge [] ys = ys
+  merge (x:xs) ys = 
+    let 
+      smaller = [ y | y <- ys, y <= x ]
+      bigger  = [ y | y <- ys, y > x ]
+    in
+      merge xs (smaller ++ [x] ++ bigger)
+\end{lstlisting}
+
+
+% -- Ex.04 ----------------------------------------------------------
+\vspace{5mm}
+
+\begin{exr}
+  Write \texttt{(!!)}, a function that takes a natural number \texttt{n} 
+  and a list and selects the \emph{n}th element of the list. List elements
+  are indexed from 0, not 1, and since the type of the incoming number 
+  does not prevent it from being out of range, the result should be 
+  a \texttt{Maybe} type. For example,
+
+  \begin{lstlisting}
+    [1,2,3]!!0 ==> Just 1
+    [1,2,3]!!2 ==> Just 3
+    [1,2,3]!!5 ==> Nothing
+  \end{lstlisting}
+\end{exr}
+
+\textbf{Solution}
+\begin{lstlisting}
+  (!!) :: [a] -> Int -> Maybe a
+  (!!) [] _     = Nothing
+  (!!) (x:xs) 0 = Just x
+  (!!) (x:xs) n = (!!) xs (n-1)
+\end{lstlisting}
+
+
+% -- Ex.05 ----------------------------------------------------------
+\vspace{5mm}
+
+\begin{exr}
+  Write a function \texttt{lookup} that takes a value and a list of pairs, 
+  and returns the second element of the pair that has the value as its 
+  first element. Use a Maybe type to indicate whether the lookup succeeded. 
+  For example,
+
+  \begin{lstlisting}
+    lookup 5 [(1,2),(5,3)] ==> Just 3
+    lookup 6 [(1,2),(5,3)] ==> Nothing
+  \end{lstlisting}
+\end{exr}
+
+\textbf{Solution}
+\begin{lstlisting}
+  lookup :: Int -> [(Int, a)] -> Maybe a
+  lookup _ [] = Nothing
+  lookup n ((k,v):xs)
+    | n == k    = Just v
+    | otherwise = lookup n xs
+\end{lstlisting}
+
+
+% -- Ex.06 ----------------------------------------------------------
+\vspace{5mm}
+
+\begin{exr}
+  Write a function that counts the number of times an element appears in a list.
+\end{exr}
+
+\textbf{Solution}
+\begin{lstlisting}
+  count :: Eq a => [a] -> a -> Int
+  count []     n  = 0
+  count (x:xs) n
+    | x == n    = 1 + count xs n
+    | otherwise = count xs n
+\end{lstlisting}
+
+
+% -- Ex.07 ----------------------------------------------------------
+\vspace{5mm}
+
+\begin{exr}
+  Write a function that takes a value \texttt{e} and a list of values \texttt{xs}
+  and removes all occurrences of \texttt{e} from \texttt{xs}.
+\end{exr}
+
+\textbf{Solution}
+\begin{lstlisting}
+  remove :: Eq a => [a] -> a -> [a]
+  remove []     _ = []
+  remove (x:xs) e
+    | e == x      = remove xs e
+    | otherwise   = x : remove xs e
+\end{lstlisting}
+
+
+% -- Ex.08 ----------------------------------------------------------
+\vspace{5mm}
+
+\begin{exr}
+  Write a function 
+  
+  \begin{lstlisting}
+    f :: [a] -> [a]
+  \end{lstlisting}
+
+  that removes alternating elements of its list argument, starting with 
+  the first one. For examples, \texttt{f [1,2,3,4,5,6,7]} returns 
+  \texttt{[2,4,6]}.
+\end{exr}
+
+\textbf{Solution}
+\begin{lstlisting}
+  alternating :: [a] -> [a]
+  alternating (x:[])    = []
+  alternating (x:xx:[]) = xx : []
+  alternating (x:xx:xs) = xx : alternating xs
+\end{lstlisting}
+
+
+% -- Ex.09 ----------------------------------------------------------
+\vspace{5mm}
+
+\begin{exr}
+  Write a function \texttt{extract :: [Maybe a] -> [a]} that takes a list of 
+  \texttt{Maybe} values and returns the elements they contain. For example, 
+  \texttt{extract [Just 3, Nothing, Just 7] = [3, 7]}.
+\end{exr}
+
+\textbf{Solution}
+\begin{lstlisting}
+  extract :: [Maybe a] -> [a]
+  extract []             = []
+  extract ((Nothing):xs) = extract xs
+  extract ((Just x):xs)  = x : extract xs
+\end{lstlisting}
+
+
+% -- Ex.10 ----------------------------------------------------------
+\vspace{5mm}
+
+\begin{exr}
+  Write a function
+
+  \begin{lstlisting}
+    f :: String -> String -> Maybe Int
+  \end{lstlisting}
+
+  that takes two strings. If the second string appears within the first, 
+  it returns the index identifying where it starts. Indexes start from 0. 
+  For example,
+
+  \begin{lstlisting}
+    f "abcde" "bc" ==> Just 1
+    f "abcde" "fg" ==> Nothing
+  \end{lstlisting}
+\end{exr}
+
+\textbf{Solution}
+\begin{lstlisting}
+  f :: String -> String -> Maybe Int
+  f text query = search text query 0
+    where tokenOf       = take (length query)
+          search [] _ _ = Nothing
+          search t q i  = if tokenOf t == q
+                          then Just i
+                          else search (tail t) q (i+1)
+\end{lstlisting}
+
+
+% -- Ex.11 ----------------------------------------------------------
+\marginnote{\scriptsize{p.56}}[8mm]
+
+\begin{exr}
+  Write \texttt{foldrWith}, a function that behaves like \texttt{foldr} except 
+  that it takes a function of three arguments and two lists.
+\end{exr}
+
+\textbf{Solution}
+\begin{lstlisting}
+  foldrWith :: (a -> b -> c -> a) -> a -> [b] -> [c] -> a
+  foldrWith _ acc [] _ = acc
+  foldrWith _ acc _ [] = acc
+  foldrWith f acc (x:xs) (y:ys) = foldrWith f (f acc x y) xs ys
+\end{lstlisting}
+
+
+% -- Ex.12 ----------------------------------------------------------
+\vspace{5mm}
+
+\begin{exr}
+  Using \texttt{foldr}, write a function \texttt{mappend} such that
+
+  \begin{lstlisting}
+    mappend f xs = concat (map f xs)
+  \end{lstlisting}
+\end{exr}
+
+\textbf{Solution}
+\begin{lstlisting}
+  mappend :: [a] -> [a]
+  mappend f xs = foldr ff [] xs
+    where ff e acc = f e ++ acc
+\end{lstlisting}
+
+
+% -- Ex.13 --------------------------------------------------------------------
+\vspace{5mm}
+
+\begin{exr}
+  Write \texttt{removeDuplicates}, a function that takes a list and 
+  removes all of its duplicate elements.
+\end{exr}
+
+\textbf{Solution}
+\begin{lstlisting}
+  removeDuplicates :: [a] -> [a]
+  removeDuplicates = foldr addUniq []
+    where addUniq acc e = if e `elem` acc
+                          then acc
+                          else e : acc
+\end{lstlisting}
+
+
+% -- Ex.14 --------------------------------------------------------------------
+\vspace{5mm}
+
+\begin{exr}
+  Write a recursive function that takes a value and a list of values and returns 
+  \texttt{True} if the value is in the list and \texttt{False} otherwise.
+\end{exr}
+
+\textbf{Solution}
+\begin{lstlisting}
+  onList :: Eq a => a -> [a] -> Bool
+  onList _ [] = False
+  onList e (x:xs) = if e == x
+                    then True
+                    else onList e xs
+\end{lstlisting}
+
+
+% -- Ex.15 --------------------------------------------------------------------
+\vspace{2mm}
+\marginnote{\scriptsize{pp.59-60}}[7.5mm]
+
+\begin{exr}
+  Write a function that takes two lists, and returns a list of values that appear 
+  in both lists. The function should have type 
+
+  \begin{lstlisting}  
+    intersection :: Eq a => [a] -> [a] -> [a]
+  \end{lstlisting}
+
+  (This is one way to implement the intersection operation on sets; see Chapter 8.)
+\end{exr}
+
+\textbf{Solution}
+\begin{lstlisting}
+  intersection :: Eq a => [a] -> [a] -> [a]                                       
+  intersection xs ys = foldr inter [] xs                                          
+    where inter x acc                                                             
+            | x `elem` acc = acc                                                  
+            | x `elem` ys  = x : acc                                              
+            | otherwise    = acc  
+\end{lstlisting}
+
+
+% -- Ex.16 --------------------------------------------------------------------
+\newpage
+
+\begin{exr}
+  Write a function that takes two lists, and returns \texttt{True} if all the 
+  elements of the first list also occur in the other. The function should have 
+  type \texttt{isSubset :: Eq a => [a] -> [a] -> Bool}. (This is one way to 
+  determine whether one set is a subset of another; see Chapter 8.)
+\end{exr}
+
+\textbf{Solution}
+\begin{lstlisting}
+  isSubset :: Eq a => [a] -> [a] -> Bool
+  isSubset xs ys = foldl inYs True xs
+    where inYs acc x = x `elem` ys && acc
+\end{lstlisting}
+
+
+% -- Ex.17 --------------------------------------------------------------------
+\vspace{5mm}
+
+\begin{exr}
+  Write a recursive function that determines whether a list is sorted.
+\end{exr}
+
+\textbf{Solution}
+\begin{lstlisting}
+  isSorted :: Ord a => [a] -> Bool
+  isSorted []        = True
+  isSorted (_:[])    = True
+  isSorted (x:xx:xs) = if x < xx
+                       then isSorted (xx:xs)
+                       else False
+\end{lstlisting}
+
+
+% -- Ex.18 --------------------------------------------------------------------
+\vspace{5mm}
+
+\begin{exr}
+  Show that the definition of \texttt{factorial} using \texttt{foldr} always 
+  produces the same result as the recursive definition given in the previous 
+  section.
+\end{exr}
+
+\textbf{Solution}
+\begin{lstlisting}
+  -- recursive definition
+  factorial :: Int -> Int
+  factorial 0 = 1
+  factorial n = factorial (n-1) * n
+
+  factorial 3
+  = (factorial 2) * 3
+  = ((factorial 1) * 2) * 3
+  = (((factorial 0) * 1) * 2) * 3
+  = ((1 * 1) * 2) * 3
+  = (1 * 2) * 3
+  = 2 * 3
+  = 6
+
+  -- foldr definition
+  factorial :: Int -> Int
+  factorial n = foldr (*) 1 [1..n]
+
+  factorial 3
+  = foldr (*) 1 [1, 2, 3]
+  = 1 * foldr (*) 1 [2, 3]
+  = 1 * (2 * foldr (*) 1 [3])
+  = 1 * (2 * (3 * foldr (*) 1 []))
+  = 1 * (2 * (3 * 1))
+  = 1 * (2 * 3)
+  = 1 * 6
+  = 6
+  
+
+\end{lstlisting}
+
+
+% -- Ex.19 --------------------------------------------------------------------
+\vspace{5mm}
+
+\begin{exr}
+  Using recursion, define \texttt{last}, a function that takes a list and returns 
+  a \texttt{Maybe} type that is \texttt{Nothing} if the list is empty.
+\end{exr}
+
+\textbf{Solution}
+\begin{lstlisting}
+  last :: [a] -> Maybe a
+  last []     = Nothing
+  last (x:[]) = Just a
+  last (x:xs) = last xs
+\end{lstlisting}
+
+
+% -- Ex.20 --------------------------------------------------------------------
+\vspace{5mm}
+
+\begin{exr}
+  Using recursion, write two functions that expect a string containing a number 
+  that contains a decimal point (for example, \texttt{23.455}). The first function 
+  returns the whole part of the number (i.e., the part to the left of the decimal 
+  point). The second function returns the fractional part (the part to the right 
+  of the decimal point).
+\end{exr}
+
+\textbf{Solution}
+\begin{lstlisting}
+  whole :: String -> String
+  whole ""     = ""
+  whole (s:ss) = if s == '.'
+                then ""
+                else s : (whole ss)
+
+  decimal :: String -> String
+  decimal = reverse . whole . reverse
+\end{lstlisting}
+
+% % -- Ex. --------------------------------------------------------------------
+% \vspace{5mm}
+
+% \begin{exr}
+  
+% \end{exr}
+
+% \textbf{Solution}
+% \begin{lstlisting}
+  
+% \end{lstlisting}
+
+
+\end{document}

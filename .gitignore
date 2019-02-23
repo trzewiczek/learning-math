@@ -48,3 +48,6 @@ cabal.project.local~
 *.synctex.gz
 *.fdb_latexmk
 *.fls
+
+# Vim
+*.swp
